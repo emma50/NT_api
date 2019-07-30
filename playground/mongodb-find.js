@@ -45,5 +45,7 @@ MongoClient.connect("mongodb://localhost:9010/TodoApp", (err, db) => {
           console.log("Unable to fetch todos", err);
       })
     
-    // db.close()     // close connection with the MongoDB server
+    // db.close()     // close connection with the MongoDB server --- but we do not want to close now because when we do it's going to interfere with the data we are about to write
 })     
+
+// findOne() --- search an individual document
