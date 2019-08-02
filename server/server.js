@@ -1,5 +1,4 @@
 const express = require("express");
-// body-parser let us send JSON to the server. the server can then takes the JSON and do something with it.
 // body-parser essentially parses the body. takes the string body and turns it into a JSON
 const bodyParser = require("body-parser");
 
@@ -29,22 +28,24 @@ app.post("/todos", (req, res) => {
 })
 
 // setup users route
-app.post("/users", (req, res) => {
-    // console.log(req.body)
-    // create an instance of the mongoose model
-    var todo = new User({
-        email: req.body.email
-    });
+// app.post("/users", (req, res) => {
+//     // console.log(req.body)
+//     // create an instance of the mongoose model
+//     var user = new User({
+//         email: req.body.email
+//     });
 
-    // save the model to the database  --- take in the text and save it in the database
-    todo.save().then((doc) => {
-        return res.send(doc);
-    }).catch((err) => {
-        res.status(400).send(err);
-    })
-})
+    // save the model to the database  --- take in the email and save it in the database
+//     user.save().then((doc) => {
+//         return res.send(doc);
+//     }).catch((err) => {
+//         res.status(400).send(err);
+//     })
+// })
 
 app.listen(3000, () => console.log("Started on port 3000"))
+
+module.exports = { app };
 
 
 
