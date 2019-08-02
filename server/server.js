@@ -11,7 +11,7 @@ const app = express();
 // body-parser middleware --- reads incoming string body as JSON and send it to the express application
 app.use(bodyParser.json());
 
-// setup todos route
+// setup POST /todos route
 app.post("/todos", (req, res) => {
     // console.log(req.body)
     // create an instance of the mongoose model
@@ -21,10 +21,17 @@ app.post("/todos", (req, res) => {
 
     // save the model to the database  --- take in the text and save it in the database
     todo.save().then((doc) => {
-        return res.send(doc);
+        res.send(doc);
     }).catch((err) => {
         res.status(400).send(err);
     })
+})
+
+// setup GET /todos route
+app.get("/todos", (req, res) => {
+    Todo.find()
+      .then((todos) => res.send({todos}))
+      .catch((err) => res.status(400).send(err))
 })
 
 // setup users route
