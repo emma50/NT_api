@@ -81,7 +81,7 @@ app.delete("/todos/:id", (req, res) => {
           }
 
           // when we pass in a valid obj id that march a document we get it back
-          res.send(todo)
+          res.send({todo})
       })
       .catch((err) => {    // error callback
           // the req cannot be fulfilled due to bad syntax

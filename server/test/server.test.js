@@ -37,7 +37,7 @@ describe("POST /todos", () => {
           .expect((res) => {     // expect takes in a function
               expect(res.body.text).toBe(text);
           })
-          .end((err, res) => {      // instead of end(done) we handle err and res
+          .end((err, res) => {      // query the database
               // handle error 
               if (err) {
                  return done(err);    // end test
@@ -65,7 +65,7 @@ describe("POST /todos", () => {
                  return done(err);    
               }
 
-              Todo.find()  // we want to fetch everything in the Todo collection
+              Todo.find()  // we fetch everything in the Todo collection
                 .then((todos) => {     // start making assertions
                     expect(todos.length).toBe(2);
                     done();
@@ -99,19 +99,64 @@ describe("GET /todos/:id", () => {
     });
 
     it("should return 404 if todo is not found", (done) => {
-        let id = new ObjectID()
+        let id = new ObjectID()     // let hexId = new ObjectID().toHexString()
+        
         request(app)
-          .get(`/todos/${id.toHexString()}`)
+          .get(`/todos/${id.toHexString()}`)     // .get(`/todos/${hexId}`)
           .expect(404)
           .end(done)
     })
 
-    it("should return 404 for invalid object id", (done) => {
+    it("should return 404 if todo is not found", (done) => {
         let id = 123
+        
         request(app)
           .get(`/todos/${id}`)
           .expect(404)
           .end(done)
     })
 });
+
+describe("DELETE /todos/:id ", () => {
+    it("should remove a todo", (done) => {
+        let hexId = todos[1]._id.toHexString();     // the second element in the todos array
+
+        request(app)
+          .delete(`/todos/${hexId}`)     
+          .expect(200)
+          .expect((res) => {
+              expect(res.body.todo._id).toBe(hexId);
+          })
+          .end((err, res) => {    // query the database
+              if (err) {
+                  return done(err);    
+              }
+
+              Todo.findById(hexId)  // we fetch the Todo collection from database by Id
+                .then((todos) => {     // start making assertions
+                    expect(todos).toNotExist();
+                    done();
+                })
+                .catch((err) => done(err))
+          })
+    })
+
+    it("should return 404 if todo is not found", (done) => {
+        let hexId = new ObjectID().toHexString()     // generate random id
+        
+        request(app)
+          .delete(`/todos/${hexId}`)     
+          .expect(404)
+          .end(done)
+    })
+
+    it("should return 404 if object id is invalid", (done) => {
+        let id = 123     // generate invalid id
+        
+        request(app)
+          .delete(`/todos/${id}`)
+          .expect(404)
+          .end(done)
+    })
+})
 
