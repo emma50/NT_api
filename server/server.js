@@ -55,7 +55,7 @@ app.get("/todos/:id", (req, res) => {
               return res.status(404).send();
           }
 
-          // when we pass in a valid obj id that march a document we get it back
+          // when we pass in a valid obj id that match a document we get it back
           res.send({todo})
       })
       .catch((err) => {    // error callback
@@ -64,6 +64,31 @@ app.get("/todos/:id", (req, res) => {
       })
 })
 
+app.delete("/todos/:id", (req, res) => {
+    let id = req.params.id;
+       
+    // validate the id
+    if(!ObjectID.isValid(id)) {
+        // handles when we pass in an invalid obj id format 
+        return res.status(404).send();
+    }
+
+    Todo.findByIdAndRemove(id)
+      .then((todo) => {    // success callback
+          // handles when we pass in a valid obj id format but it does not match a document
+          if(!todo) {
+              return res.status(404).send();
+          }
+
+          // when we pass in a valid obj id that march a document we get it back
+          res.send(todo)
+      })
+      .catch((err) => {    // error callback
+          // the req cannot be fulfilled due to bad syntax
+          res.status(400).send()
+      })
+
+})
 
 app.listen(port, () => console.log(`Started on port ${port}`))
 
