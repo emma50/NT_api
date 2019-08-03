@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const express = require("express");
 // body-parser essentially parses the body. takes the string body and turns it into a JSON
 const bodyParser = require("body-parser");
@@ -64,6 +65,7 @@ app.get("/todos/:id", (req, res) => {
       })
 })
 
+// setup DELETE /todos/:id route
 app.delete("/todos/:id", (req, res) => {
     let id = req.params.id;
        
@@ -86,6 +88,42 @@ app.delete("/todos/:id", (req, res) => {
       .catch((err) => {    // error callback
           // the req cannot be fulfilled due to bad syntax
           res.status(400).send()
+      })
+
+})
+
+// setup PATCH /todos/:id route --- the http patch() method is used to update a resource
+app.patch("/todos/:id", (req, res) => {
+    let id = req.params.id;
+
+    // this is where the update is going to be stored --- will pull off the property we want the user to update
+    let body = _.pick(req.body, ["text", "completed"])     // .pick({}, [array of props to be pulled off])
+
+    // validate the id
+    if(!ObjectID.isValid(id)) {
+        // handles when we pass in an invalid obj id format 
+        return res.status(404).send();
+    }
+
+    if (_.isBoolean(body.completed) && body.completed) {   // if body.completed is Boolean & is true
+        body.completedAt = new Date().getTime()     // set completedAt to the current time
+    } else {
+        body.completed = false;
+        body.completedAt = null;   // empty
+    }
+
+    // query to update the database
+    Todo.findByIdAndUpdate(id, {$set: body}, {$new: true})     // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
+      .then((todo) => {
+          if (!todo) { // check if todo obj exist
+              return res.status(404).send()
+          }
+
+          // runs if todo exist
+          res.send({todo})
+      })
+      .catch((err) => {
+          res.status(400).send();
       })
 
 })
