@@ -1,17 +1,21 @@
+// const config = require("./config/config");   // env configuration
+require("./config/config");
+
 const _ = require("lodash");
 const express = require("express");
 // body-parser essentially parses the body. takes the string body and turns it into a JSON
 const bodyParser = require("body-parser");
 const {ObjectID} = require("mongodb")    // from MongoDB library/Mongo Driver API
 
-
 const {mongoose} = require("./db/mongoose");    // var mongoose = require("./db/mongoose");
 const {User} = require("./models/user");     // var User = require("./models/user");
 const {Todo} = require("./models/todo");    // var Todo = require("./models/todo"); 
 
 const app = express();
+
 // allows Heroku to access port and port also works on localhost
-const port = process.env.PORT || 3000
+// const port = process.env.PORT || 3000
+const port = process.env.PORT;
 
 // body-parser middleware --- reads incoming string body as JSON and send it to the express application
 app.use(bodyParser.json());
