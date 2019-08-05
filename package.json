@@ -12,7 +12,7 @@
     "node": "8.11.3"
   },
   "keywords": [],
-  "author": "Okwuidegbe Emmanue;",
+  "author": "Okwuidegbe Emmanuel",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.2",

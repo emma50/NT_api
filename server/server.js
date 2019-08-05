@@ -89,7 +89,6 @@ app.delete("/todos/:id", (req, res) => {
           // the req cannot be fulfilled due to bad syntax
           res.status(400).send()
       })
-
 })
 
 // setup PATCH /todos/:id route --- the http patch() method is used to update a resource
@@ -113,7 +112,7 @@ app.patch("/todos/:id", (req, res) => {
     }
 
     // query to update the database
-    Todo.findByIdAndUpdate(id, {$set: body}, {$new: true})     // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true})     // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
       .then((todo) => {
           if (!todo) { // check if todo obj exist
               return res.status(404).send()
@@ -125,7 +124,6 @@ app.patch("/todos/:id", (req, res) => {
       .catch((err) => {
           res.status(400).send();
       })
-
 })
 
 app.listen(port, () => console.log(`Started on port ${port}`))

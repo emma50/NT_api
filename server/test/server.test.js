@@ -4,7 +4,6 @@ const {ObjectID} = require("mongodb");
 
 const {app} = require("./../server");     // const app = require("./../server").app
 const {Todo} = require("./../models/todo");
-const {User} = require("./../models/user");
 
 // we create a dummy todo
 const todos = [{
@@ -12,7 +11,9 @@ const todos = [{
     text: "First todo test"
 }, {
     _id: new ObjectID(),
-    text: "Second todo test"
+    text: "Second todo test",
+    completed: true,
+    completedAt: new Date()
 }];
 
 // we run a lifecycle/hook method called beforeEach() which allows us to run some code before every single test case
@@ -156,6 +157,46 @@ describe("DELETE /todos/:id ", () => {
         request(app)
           .delete(`/todos/${id}`)
           .expect(404)
+          .end(done)
+    })
+})
+
+describe("PATCH /todos/:id", () => {
+    it("should update a todo", (done) => {
+        let hexId = todos[0]._id.toHexString();    // grab first todo id   
+        let text = "Dummy minds here";
+
+        request(app)
+          .patch(`/todos/${hexId}`) 
+          .send({
+              completed: true, 
+              text
+          })   
+          .expect(200)
+          .expect((res) => {
+              expect(res.body.todo.text).toBe(text);
+              expect(res.body.todo.completed).toBe(true);
+              expect(res.body.todo.completedAt).toBeA("string")
+          })
+          .end(done)
+    })
+
+    it("should clear completedAt when todo is not completed", (done) => {
+        let hexId = todos[1]._id.toHexString();    // grab first todo id
+        let text = "text is the new text!!";   
+        
+        request(app)
+          .patch(`/todos/${hexId}`) 
+          .send({   // we need to send some data
+              completed: false,
+              text
+          })    
+          .expect(200)
+          .expect((res) => {
+              expect(res.body.todo.text).toBe(text);
+              expect(res.body.todo.completed).toBe(false);
+              expect(res.body.todo.completedAt).toNotExist()
+          })
           .end(done)
     })
 })
