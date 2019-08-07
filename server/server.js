@@ -5,7 +5,7 @@ const _ = require("lodash");
 const express = require("express");
 // body-parser essentially parses the body. takes the string body and turns it into a JSON
 const bodyParser = require("body-parser");
-const {ObjectID} = require("mongodb")    // from MongoDB library/Mongo Driver API
+const {ObjectID} = require("mongodb");    // from MongoDB library/Mongo Driver API
 
 const {mongoose} = require("./db/mongoose");    // var mongoose = require("./db/mongoose");
 const {User} = require("./models/user");     // var User = require("./models/user");
@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.post("/todos", (req, res) => {
     // console.log(req.body)
     // create an instance of the mongoose model
-    var todo = new Todo({
+    let todo = new Todo({
         text: req.body.text
     });
 
@@ -116,7 +116,7 @@ app.patch("/todos/:id", (req, res) => {
     }
 
     // query to update the database
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true})     // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true})    // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
       .then((todo) => {
           if (!todo) { // check if todo obj exist
               return res.status(404).send()
@@ -128,6 +128,24 @@ app.patch("/todos/:id", (req, res) => {
       .catch((err) => {
           res.status(400).send();
       })
+})
+
+
+// setup POST /users route
+app.post("/users", (req, res) => {
+    let body = _.pick(req.body, ["email", "password"])  
+    let user = new User(body);    // pass in email & password to the user obj
+    
+    // User.findByToken()    // a custom model method 
+
+    // save the model to the database  --- take in the text and save it in the database
+    user.save().then((user) => {
+        return user.generateAuthToken();    // responsible for adding a token to individual user document
+    }).then((token) => {
+        res.header("x-auth", token).send(user);   // prefix a header with x- you create a custom header
+    }).catch((err) => {
+        res.status(400).send(err);
+    })
 })
 
 app.listen(port, () => console.log(`Started on port ${port}`))
