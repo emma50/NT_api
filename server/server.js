@@ -10,6 +10,7 @@ const {ObjectID} = require("mongodb");    // from MongoDB library/Mongo Driver A
 const {mongoose} = require("./db/mongoose");    // var mongoose = require("./db/mongoose");
 const {User} = require("./models/user");     // var User = require("./models/user");
 const {Todo} = require("./models/todo");    // var Todo = require("./models/todo"); 
+const {authenticate} = require("./middleware/authenticate");   // the authentication middleware
 
 const app = express();
 
@@ -146,6 +147,11 @@ app.post("/users", (req, res) => {
     }).catch((err) => {
         res.status(400).send(err);
     })
+})
+
+// setup a private route --- /users/me
+app.get("/users/me", authenticate, (req, res) => {    // we need a middleware to make a route private
+    res.send(req.user);
 })
 
 app.listen(port, () => console.log(`Started on port ${port}`))
