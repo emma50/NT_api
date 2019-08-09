@@ -86,8 +86,30 @@ UserSchema.statics.findByToken = function(token) {
     });
 };
 
+UserSchema.statics.findByCredentials = function(email, password) {
+    let User = this;
+
+    return User.findOne({email}).then((user) => {    // verify that the user exist
+        if (!user) {    // runs if the user does not exist
+            return Promise.reject();
+        }
+
+        // runs if the user exist
+        return new Promise((resolve, reject) => {
+            // compare password and user password
+            bcrypt.compare(password, user.password, (err, res) => {
+                if (res) {
+                    resolve(user);
+                } else {
+                    reject();
+                }
+            });
+        });
+    });
+}
+
 // mongoose middleware --- runs a code before or after certain event i.e an update even
-UserSchema.pre("save", function (next) {
+UserSchema.pre("save", function(next) {
     let user = this;
     
     if(user.isModified("password")) {  // .isModified() returns a Boolean
