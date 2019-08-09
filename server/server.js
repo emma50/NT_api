@@ -132,7 +132,7 @@ app.patch("/todos/:id", (req, res) => {
 })
 
 
-// setup POST /users route --- for user signup
+// setup POST /users route --- user signup route
 app.post("/users", (req, res) => {
     let body = _.pick(req.body, ["email", "password"])  
     let user = new User(body);    // pass in email & password to the user obj
@@ -149,12 +149,12 @@ app.post("/users", (req, res) => {
     })
 })
 
-// setup a private route --- /users/me
+// setup a private route /users/me --- user authentication route
 app.get("/users/me", authenticate, (req, res) => {    // we need a middleware to make a route private
     res.send(req.user);
 })
 
-// setup a POST /users/login route
+// setup a POST /users/login route --- user login route
 app.post("/users/login", (req, res) => {
     let body = _.pick(req.body, ["email", "password"]);
 
@@ -166,6 +166,13 @@ app.post("/users/login", (req, res) => {
         res.status(400).send();
     })
 })
+
+// setup a DELETE /users/me route --- user logout route
+app.delete("/users/me/token", authenticate, (req, res) => {     // we make the route private
+    req.user.removeToken(req.token).then(() => {
+        res.status(200).send()
+    }).catch((err) => res.status(400).send())
+}) 
 
 app.listen(port, () => console.log(`Started on port ${port}`))
 
