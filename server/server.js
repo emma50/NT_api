@@ -21,12 +21,13 @@ const port = process.env.PORT;
 // body-parser middleware --- reads incoming string body as JSON and send it to the express application
 app.use(bodyParser.json());
 
-// setup POST /todos route
-app.post("/todos", (req, res) => {
+// setup private POST /todos route
+app.post("/todos", authenticate, (req, res) => {
     // console.log(req.body)
     // create an instance of the mongoose model
     let todo = new Todo({
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user._id
     });
 
     // save the model to the database  --- take in the text and save it in the database
@@ -37,15 +38,17 @@ app.post("/todos", (req, res) => {
     })
 })
 
-// setup GET /todos route
-app.get("/todos", (req, res) => {
-    Todo.find()    // one way to query data in mongoose
-      .then((todos) => res.send({todos}))
-      .catch((err) => res.status(400).send(err))
+// setup private GET /todos route
+app.get("/todos", authenticate, (req, res) => {
+    Todo.find({   // one way to query data in mongoose
+        _creator: req.user._id   // match the user id that created the todo
+    })    
+    .then((todos) => res.send({todos}))
+    .catch((err) => res.status(400).send(err))
 })
 
-// setup GET /todos/:id route
-app.get("/todos/:id", (req, res) => {
+// setup private GET /todos/:id route
+app.get("/todos/:id", authenticate, (req, res) => {
     let id = req.params.id;
        
     // validate the id
@@ -54,24 +57,25 @@ app.get("/todos/:id", (req, res) => {
         return res.status(404).send();
     }
 
-    Todo.findById(id)
-      .then((todo) => {    // success callback
-          // handles when we pass in a valid obj id format but it does not march a document
-          if(!todo) {
-              return res.status(404).send();
-          }
+    Todo.findOne({
+        _id: id,     // _id in the database should match the id provided in the url
+        _creator: req.user._id
+    }).then((todo) => {   // success callback
+        // handles when we pass in a valid obj id format but it does not march a document
+        if(!todo) {
+            return res.status(404).send();
+        }
 
-          // when we pass in a valid obj id that match a document we get it back
-          res.send({todo})
-      })
-      .catch((err) => {    // error callback
-          // the req cannot be fulfilled due to bad syntax
-          res.status(400).send()
-      })
+        // when we pass in a valid obj id that match a document we get it back
+        res.send({todo})
+    }).catch((err) => {   // error callback
+        // the req cannot be fulfilled due to bad syntax
+        res.status(400).send()
+    })
 })
 
-// setup DELETE /todos/:id route
-app.delete("/todos/:id", (req, res) => {
+// setup private DELETE /todos/:id route
+app.delete("/todos/:id", authenticate, (req, res) => {
     let id = req.params.id;
        
     // validate the id
@@ -80,7 +84,10 @@ app.delete("/todos/:id", (req, res) => {
         return res.status(404).send();
     }
 
-    Todo.findByIdAndRemove(id)
+    Todo.findOneAndRemove({
+        _id: id, 
+        _creator: req.user._id
+    })
       .then((todo) => {    // success callback
           // handles when we pass in a valid obj id format but it does not match a document
           if(!todo) {
@@ -96,8 +103,8 @@ app.delete("/todos/:id", (req, res) => {
       })
 })
 
-// setup PATCH /todos/:id route --- the http patch() method is used to update a resource
-app.patch("/todos/:id", (req, res) => {
+// setup private PATCH /todos/:id route --- the http patch() method is used to update a resource
+app.patch("/todos/:id", authenticate, (req, res) => {
     let id = req.params.id;
 
     // this is where the update is going to be stored --- will pull off the property we want the user to update
@@ -117,7 +124,7 @@ app.patch("/todos/:id", (req, res) => {
     }
 
     // query to update the database
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true})    // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
+    Todo.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true})    // .findByIdAndUpdate() takes in the id, set the value in body, return new value true
       .then((todo) => {
           if (!todo) { // check if todo obj exist
               return res.status(404).send()
@@ -160,7 +167,7 @@ app.post("/users/login", (req, res) => {
 
     User.findByCredentials(body.email, body.password).then((user) => {
         return user.generateAuthToken().then((token) => {
-            res.header("x-auth", token).send(user);
+            res.header("x-auth", token).send(user);     // res.header("x-auth", token).send(user);
         })
     }).catch((err) => {
         res.status(400).send();

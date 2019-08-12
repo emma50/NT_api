@@ -17,7 +17,11 @@ const Todo = mongoose.model("Todo", {   // takes two arguments --- .model("strin
    completedAt: {
        type: Date, 
        default: null
-   }
+   },
+   _creator: {   // it could be given any name but it stores the id of the user who created the todo --- meaning a todo could only be made only if the user is logged in
+       type: mongoose.Schema.Types.ObjectId,   // this is a mongoose ObjectId
+       required: true,
+   } 
 }) 
 
 // module.exports.Todo = Todo

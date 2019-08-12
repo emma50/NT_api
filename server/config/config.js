@@ -1,5 +1,5 @@
 const env = process.env.NODE_ENV || "development";  // This variable is only set on heroku. we don't have it set locally
-console.log("env ====", env);
+console.log("env ====", env);   // this tells us the running env i.e test, development, production.
 
 if (env === "development") {
     // setup the MongoDB url

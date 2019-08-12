@@ -16,19 +16,25 @@ const users = [{
     }]
 }, {
     _id: userTwoId,
-    email: "emma@eample.com",
+    email: "emma@example.com",
     password: "userTwoPass",
+    tokens: [{
+        access: "auth",
+        token: jwt.sign({_id: userTwoId, access: "auth"}, "abc123").toString()
+    }]
 }]
 
 // we create a dummy todo
 const todos = [{
     _id: new ObjectID(),
-    text: "First todo test"
+    text: "First todo test",
+    _creator: userOneId   // associate  todo with a user
 }, {
     _id: new ObjectID(),
     text: "Second todo test",
     completed: true,
-    completedAt: new Date()
+    completedAt: new Date(),
+    _creator: userTwoId   // associate todo with a user
 }];
 
 const populateTodos = (done) => {
