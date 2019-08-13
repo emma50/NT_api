@@ -12,8 +12,11 @@ beforeEach(populateUsers);
 beforeEach(populateTodos);
 
 // override mocha default timeout
-describe("something", function () {
-    this.timeout(0); 
+describe("MOCHA timeout", function () {
+    it("should reset mocha default timeout", function(done) {
+        this.timeout(30000);
+        done();
+    }) 
 });
 
 
