@@ -11,22 +11,14 @@ const {todos, populateTodos, users, populateUsers} = require("./seed/seed");
 beforeEach(populateUsers);
 beforeEach(populateTodos);
 
-// override mocha default timeout
-describe("MOCHA timeout", function () {
-    it("should reset mocha default timeout", function(done) {
-        this.timeout(30000);
-        done();
-    }) 
-});
-
 
 describe("POST /todos", () => {
     it("should create a new todo", (done) => {
-        let text = "Test the text";
+       let text = "Test the text";
         
         // lets start using supertest
-        request(app)
-          .post("/todos")    // sets up a post request
+         request(app)
+         .post("/todos")    // sets up a post request
           .set("x-auth", users[0].tokens[0].token)  // verify user
           .send({text})   // will send data along with the request which is automatically converted to JSON by supertest
           .expect(200)     // we start making assertions about the request with res.statusCode == 200|ok
@@ -144,7 +136,7 @@ describe("DELETE /todos/:id ", () => {
 
               Todo.findById(hexId)  // we fetch the Todo collection from database by Id
                 .then((todos) => {     // start making assertions
-                    expect(todos).toNotExist();
+                    expect(todos).toBeFalsy();
                     done();
                 })
                 .catch((err) => done(err))
@@ -165,7 +157,7 @@ describe("DELETE /todos/:id ", () => {
 
               Todo.findById(hexId)  // we fetch the Todo collection from database by Id
                 .then((todos) => {     // start making assertions
-                    expect(todos).toExist();
+                    expect(todos).toBeTruthy();
                     done();
                 })
                 .catch((err) => done(err))
@@ -210,7 +202,8 @@ describe("PATCH /todos/:id", () => {
           .expect((res) => {
               expect(res.body.todo.text).toBe(text);
               expect(res.body.todo.completed).toBe(true);
-              expect(res.body.todo.completedAt).toBeA("string")
+            //   expect(res.body.todo.completedAt).toBeA("string")     // obsolete
+              expect(typeof res.body.todo.completedAt).toBe("string")
           })
           .end(done)
     })
@@ -245,7 +238,7 @@ describe("PATCH /todos/:id", () => {
           .expect((res) => {
               expect(res.body.todo.text).toBe(text);
               expect(res.body.todo.completed).toBe(false);
-              expect(res.body.todo.completedAt).toNotExist()
+              expect(res.body.todo.completedAt).toBeFalsy();
           })
           .end(done)
     })
@@ -287,8 +280,8 @@ describe("POST /users", () => {
           .send({email, password})
           .expect(200)
           .expect((res) => {
-              expect(res.headers["x-auth"]).toExist();
-              expect(res.body._id).toExist();
+              expect(res.headers["x-auth"]).toBeTruthy();
+              expect(res.body._id).toBeTruthy();
               expect(res.body.email).toBe(email);
           })
           .end((err) => {    // custom function to query database
@@ -297,8 +290,9 @@ describe("POST /users", () => {
               }
 
               User.findOne({email}).then((user) => {
-                  expect(user).toExist();
-                  expect(user.password).toNotBe(password);     // because password should have been hashed
+                  expect(user).toBeTruthy();
+                //   expect(user.password).toNotBe(password);     // obsolete
+                  expect(user.password).not.toBe(password);      // because password should have been hashed
                   done()
               }).catch((err) => done(err));
           })
@@ -338,7 +332,7 @@ describe("POST /users/login", () => {
           })
           .expect(200)
           .expect((res) => {
-              expect(res.headers["x-auth"]).toExist();
+              expect(res.headers["x-auth"]).toBeTruthy();
           })
           .end((err, res) => {
             if (err) {
@@ -346,7 +340,7 @@ describe("POST /users/login", () => {
             } else {
                 User.findById(users[1]._id).then((user) => {
                     // assert the x-auth token was added to the token array
-                    expect(user.tokens[0]).toInclude({     // expect(user.tokens[1]).toInclude({
+                    expect(user.toObject().tokens[0]).toMatchObject({     // expect(user.tokens[1]).toInclude({ --- obsolete
                         access: "auth",
                         token: res.headers["x-auth"]
                     });
@@ -365,7 +359,7 @@ describe("POST /users/login", () => {
           })
           .expect(400)
           .expect((res) => {
-              expect(res.headers["x-auth"]).toNotExist();
+              expect(res.headers["x-auth"]).toBeFalsy();
           })
           .end((err, res) => {
             if (err) {
