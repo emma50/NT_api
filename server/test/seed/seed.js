@@ -24,7 +24,7 @@ const users = [{
     }]
 }]
 
-// we create a dummy todo
+// create a dummy todo
 const todos = [{
     _id: new ObjectID(),
     text: "First todo test",
@@ -34,7 +34,7 @@ const todos = [{
     text: "Second todo test",
     completed: true,
     completedAt: new Date(),
-    _creator: userTwoId   // associate todo with a user
+    _creator: userTwoId   
 }];
 
 const populateTodos = (done) => {
@@ -42,7 +42,7 @@ const populateTodos = (done) => {
       .then(() => {    
          return  Todo.insertMany(todos)
       })
-      .then(() => done())   // only moves to the test case once we call done() --- an expression syntax
+      .then(() => done())   
       .catch((err) => console.log("Could not empty the Todo collection", err))
 }
 
@@ -51,10 +51,9 @@ const populateUsers = (done) => {
       .then(() => {    
         let userOne = new User(users[0]).save();
         let userTwo = new User(users[1]).save();
-        // return [userOne, userTwo];
         return Promise.all([userOne, userTwo])
       })
-      .then(() => done())   // only moves to the test case once we call done() --- an expression syntax
+      .then(() => done())   
       .catch((err) => console.log("Could not empty the User collection", err))
 }
 
